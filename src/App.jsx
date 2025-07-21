@@ -1,40 +1,32 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import Public from "./pages/Public";
-import Private from "./pages/Private";
-import LoginButton from "./components/LoginButton";
-import LogoutButton from "./components/LogoutButton";
-import Profile from "./components/Profile";
+import AdminPage from "./pages/AdminPage";
+import ClientPage from "./pages/ClientPage";
+import Header from "./components/Header";
 import RoleBasedComponent from "./components/RoleBasedComponents";
-import "./App.css";
 
 function App() {
   return (
     <Router>
-      <nav
-        style={{
-          padding: "10px",
-          backgroundColor: "#f5f5f5",
-          marginBottom: "20px",
-        }}
-      >
-        <Link to="/">Home</Link> | <Link to="/public">Public</Link> |{" "}
-        <Link to="/private">Private</Link> | <LoginButton /> | <LogoutButton />
-        <RoleBasedComponent allowedRoles={["admin"]}>
-          {" "}
-          |{" "}
-          <Link to="/admin" style={{ color: "red" }}>
-            Admin Panel
-          </Link>
-        </RoleBasedComponent>
-      </nav>
-
-      <Profile />
-
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/public" element={<Public />} />
-        <Route path="/private" element={<Private />} />
+        <Route
+          path="/admin"
+          element={
+            <RoleBasedComponent allowedRoles={["admin"]}>
+              <AdminPage />
+            </RoleBasedComponent>
+          }
+        />
+        <Route
+          path="/client"
+          element={
+            <RoleBasedComponent allowedRoles={["user"]}>
+              <ClientPage />
+            </RoleBasedComponent>
+          }
+        />
       </Routes>
     </Router>
   );
