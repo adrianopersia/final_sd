@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import AdminPage from "./pages/AdminPage";
+import AdminPage from "./pages/Admin";
 import ClientPage from "./pages/ClientPage";
 import Header from "./components/Header";
-import RoleBasedComponent from "./components/RoleBasedComponents";
+import RoleBasedComponent from "./components/RoleBasedComponent";
 
 function App() {
   return (
