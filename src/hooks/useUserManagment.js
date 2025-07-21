@@ -1,108 +1,63 @@
-"use client";
-
 import { useState } from "react";
 import { useApi } from "./useApi";
 
-export const useUserManagement = () => {
-  const { callApi, loading, error } = useApi();
+export function useUserManagement() {
+  const { callApi } = useApi();
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const fetchUsers = async () => {
-    try {
-      const response = await callApi("/api/admin/users");
-      setUsers(response);
-      return response;
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      throw error;
-    }
+    setLoading(true);
+    const data = await callApi("/users");
+    setUsers(data);
+    setLoading(false);
   };
 
   const fetchUserStats = async () => {
-    try {
-      const response = await callApi("/api/admin/users/stats");
-      setStats(response);
-      return response;
-    } catch (error) {
-      console.error("Error fetching user stats:", error);
-      throw error;
-    }
+    // Ejemplo de cómo podés calcular stats localmente:
+    const totalUsers = users.length;
+    const activeUsers = users.filter((u) => u.status === "active").length;
+    const adminUsers = users.filter((u) => u.role === "admin").length;
+    const regularUsers = users.filter((u) => u.role !== "admin").length;
+    setStats({ totalUsers, activeUsers, adminUsers, regularUsers });
   };
 
-  const createUser = async (userData) => {
-    try {
-      const response = await callApi("/api/admin/users", {
-        method: "POST",
-        body: JSON.stringify(userData),
-      });
-      // Actualizar la lista local
-      setUsers((prevUsers) => [...prevUsers, response]);
-      return response;
-    } catch (error) {
-      console.error("Error creating user:", error);
-      throw error;
-    }
+  const createUser = async (newUser) => {
+    const created = await callApi("/users", {
+      method: "POST",
+      body: JSON.stringify(newUser),
+    });
+    setUsers((prev) => [...prev, created]);
   };
 
-  const updateUserRole = async (userId, newRole) => {
-    try {
-      const response = await callApi(`/api/admin/users/${userId}/role`, {
-        method: "PUT",
-        body: JSON.stringify({ role: newRole }),
-      });
-      // Actualizar la lista local
-      setUsers((prevUsers) =>
-        prevUsers.map((user) => (user.id === userId ? response : user))
-      );
-      return response;
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      throw error;
-    }
+  const updateUser = async (id, updatedFields) => {
+    const updated = await callApi(`/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updatedFields),
+    });
+    setUsers((prev) => prev.map((u) => (u.id === id ? updated : u)));
   };
 
-  const updateUserStatus = async (userId, newStatus) => {
-    try {
-      const response = await callApi(`/api/admin/users/${userId}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status: newStatus }),
-      });
-      // Actualizar la lista local
-      setUsers((prevUsers) =>
-        prevUsers.map((user) => (user.id === userId ? response : user))
-      );
-      return response;
-    } catch (error) {
-      console.error("Error updating user status:", error);
-      throw error;
-    }
+  const updateUserStatus = async (id, newStatus) => {
+    const user = users.find((u) => u.id === id);
+    await updateUser(id, { ...user, status: newStatus });
   };
 
-  const deleteUser = async (userId) => {
-    try {
-      await callApi(`/api/admin/users/${userId}`, {
-        method: "DELETE",
-      });
-      // Actualizar la lista local
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-      return true;
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      throw error;
-    }
+  const updateUserRole = async (id, newRole) => {
+    const user = users.find((u) => u.id === id);
+    await updateUser(id, { ...user, role: newRole });
   };
 
   return {
     users,
     stats,
     loading,
-    error,
     fetchUsers,
     fetchUserStats,
     createUser,
-    updateUserRole,
+    updateUser,
     updateUserStatus,
-    deleteUser,
+    updateUserRole,
   };
-};
+}
