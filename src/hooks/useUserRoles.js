@@ -7,7 +7,6 @@ export const useUserRoles = () => {
     if (!isAuthenticated || !user) return [];
 
     const roles = user["https://final-sd-api/roles"] || [];
-    // Convertir todos los roles a minúsculas para comparación
     return roles.map((role) => role.toLowerCase());
   };
 
